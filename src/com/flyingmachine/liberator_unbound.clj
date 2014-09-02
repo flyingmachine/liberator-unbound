@@ -1,8 +1,9 @@
 (ns com.flyingmachine.liberator-unbound
   "Functions to more easily define resources at runtime"
-  (:require [liberator.core :refer (resource default-functions)]))
+  (:require [liberator.core :refer (resource default-functions)]
+            [compojure.core :refer (ANY routes)]))
 
-(defn method-resource-map
+(defn- method-resource-map
   "Associates HTTP methods with the resource definition"
   [config-map]
   (reduce (fn [result [k v]]
@@ -10,7 +11,7 @@
           {}
           config-map))
 
-(defn method-dispatcher
+(defn- method-dispatcher
   "Returns a function which calls the correct option based on the
   request method"
   [config-map method-map option]
@@ -23,7 +24,7 @@
        (nil? entry) (option default-functions)
        :else entry))))
 
-(defn combine-configs
+(defn- combine-configs
   [config-map]
   (let [configs (vals config-map)
         options (disj (set (mapcat keys configs)) :allowed-methods)
@@ -34,11 +35,11 @@
             seed
             options)))
 
-(defn config->resource
+(defn- config->resource
   [config]
   (apply resource (apply concat config)))
 
-(defn resource-for-keys
+(defn- resource-for-keys
   [resource-configs keys]
   (let [resource-config (select-keys resource-configs keys)
         config-count (count resource-config)]
@@ -47,15 +48,7 @@
      (= 1 config-count) (config->resource (first (vals resource-config)))
      :else (config->resource (combine-configs resource-config)))))
 
-(defn entry-resource
-  [resource-configs]
-  (resource-for-keys resource-configs :show :update :delete))
-
-(defn collection-resource
-  [resource-configs]
-  (resource-for-keys resource-configs :list :create))
-
-(defn merge-decision-defaults
+(defn- merge-decision-defaults
   "This allows you to define your resource configurations more
   compacatly by merging them with a map of decision defaults"
   [defaults decisions]
@@ -67,9 +60,23 @@
   [decision-defaults resource-config-creator opts]
   (merge-decision-defaults decision-defaults (resource-config-creator opts)))
 
+(def resource-groups
+  ^{:doc "It's common to treat list and create as
+    collection requests, and the others as entry requests"}
+  {:collection [:list :create]
+   :entry [:show :update :delete]})
+
 (defn resources
-  "e.g. (resources {} {:collection [:list :create]}"
+  "e.g. (resources {} {:collection [:list :create]})"
   [groups config]
   (into {} (map (fn [[group-name config-keys]]
                   [group-name (resource-for-keys config config-keys)])
                 groups)))
+
+(defn resource-route
+  "Creates routes, assumes that your resources are grouped
+  into :collection and :entry"
+  [resources path & {:keys [entry-key] :or {entry-key ":id"}}]
+  (routes
+   (ANY path [] (:collection resources))
+   (ANY (str path "/" entry-key) [] (:entry resources))))
