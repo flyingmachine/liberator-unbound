@@ -76,7 +76,20 @@
 (defn resource-route
   "Creates routes, assumes that your resources are grouped
   into :collection and :entry"
-  [resources path & {:keys [entry-key] :or {entry-key ":id"}}]
+  [path resources & {:keys [entry-key] :or {entry-key ":id"}}]
   (routes
    (ANY path [] (:collection resources))
    (ANY (str path "/" entry-key) [] (:entry resources))))
+
+(defn bundle
+  "Create one function which will combine the work of resource-route,
+  resources, and resource-config"
+  [groups default-decisions]
+  (fn [path resource-config-creator opts & route-opts]
+    (apply resource-route
+           path
+           (resources groups
+                      (resource-config default-decisions
+                                       resource-config-creator
+                                       opts))
+           route-opts)))
