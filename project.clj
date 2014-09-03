@@ -1,4 +1,4 @@
-(defproject com.flyingmachine/liberator-unbound "0.1.0-SNAPSHOT"
+(defproject com.flyingmachine/liberator-unbound "0.1.0"
   :description "A library for creating liberator libraries"
   :url "https://github.com/flyingmachine/liberator-unbound"
   :license {:name "The MIT License"
