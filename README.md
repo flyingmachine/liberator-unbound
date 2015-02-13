@@ -23,8 +23,8 @@ Add the following to your dependencies:
 [com.flyingmachine/liberator-unbound "0.1.1"]
 ```
 
-If you're a *just gimme the source code* kind of person, have a look
-at [the tests](test/com/flyingmachine/liberator_unbound_test.clj).
+If you're a *just gimme some code* kind of person, have a look at
+[the tests](test/com/flyingmachine/liberator_unbound_test.clj).
 
 Creating resources is a multi-step process of building up a decision
 map to pass to Liberator's `resource` function. First, you create a
