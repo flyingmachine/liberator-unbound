@@ -1,6 +1,7 @@
 # Liberator Unbound
 
-Liberator Unbound lets you create functions which generate liberator
+Liberator Unbound lets you create functions which generate
+[Liberator](http://clojure-liberator.github.io/liberator/)
 resources. This makes it possible for you to create configurable
 Liberator libraries (as opposed to using `defresource`, which creates
 resources that are set in stone). For example, I've used it to create
