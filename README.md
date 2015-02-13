@@ -17,6 +17,12 @@ using functions that take arguments. Hooray!
 
 ## Usage
 
+Add the following to your dependencies:
+
+```clojure
+[com.flyingmachine/liberator-unbound "0.1.1"]
+```
+
 If you're a *just gimme the source code* kind of person, have a look
 at [the tests](test/com/flyingmachine/liberator_unbound_test.clj).
 
