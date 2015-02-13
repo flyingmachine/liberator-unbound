@@ -4,7 +4,7 @@
             [ring.mock.request :refer :all])
   (:use midje.sweet))
 
-(defn resource-config-creator
+(defn resource-decisions
   [options]
   {:list   {:handle-ok (fn [_] (-> options :list :data))}
    :create {:handle-created (fn [_] (-> options :create :data))}
@@ -19,9 +19,10 @@
    :update {:data "update data"}
    :delete {:data "delete data"}})
 
-(def resources (lu/resources {:collection [:list :create]
-                              :entry [:show :update :delete]}
-                             (lu/resource-config lud/json resource-config-creator options)))
+(def resources
+  (lu/resources {:collection [:list :create]
+                 :entry [:show :update :delete]}
+                (lu/merge-decisions lud/json (resource-decisions options))))
 
 (fact "resource groups dispatch requests correctly"
   (let [handler (:collection resources)]

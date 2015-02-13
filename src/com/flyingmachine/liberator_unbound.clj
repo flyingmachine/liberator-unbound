@@ -48,17 +48,13 @@
      (= 1 config-count) (config->resource (first (vals resource-config)))
      :else (config->resource (combine-configs resource-config)))))
 
-(defn- merge-decision-defaults
+(defn merge-decisions
   "This allows you to define your resource configurations more
   compacatly by merging them with a map of decision defaults"
   [defaults decisions]
   (merge-with merge
               (select-keys defaults (keys decisions))
               decisions))
-
-(defn resource-config
-  [decision-defaults resource-config-creator opts]
-  (merge-decision-defaults decision-defaults (resource-config-creator opts)))
 
 (def resource-groups
   ^{:doc "It's common to treat list and create as
@@ -83,13 +79,12 @@
 
 (defn bundle
   "Create one function which will combine the work of resource-route,
-  resources, and resource-config"
+  resources, and merge-decisions"
   [groups default-decisions]
-  (fn [path resource-config-creator opts & route-opts]
+  (fn [path resource-decisions opts & route-opts]
     (apply resource-route
            path
-           (resources groups
-                      (resource-config default-decisions
-                                       resource-config-creator
-                                       opts))
+           (->> (resource-decisions opts)
+                (merge-decisions default-decisions)
+                (resources groups))
            route-opts)))

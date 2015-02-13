@@ -5,13 +5,17 @@
   [ctx]
   (:record ctx))
 
+(defn errors-in-ctx
+  ([]
+   (errors-in-ctx {}))
+  ([opts]
+   (fn [ctx]
+     (merge {:errors (:errors ctx)} opts))))
+
 (def json
   ^{:doc "A 'base' set of liberator resource decisions for list,
     create, show, update, and delete"}
-  (let [errors-in-ctx (fn [ctx]
-                        {:errors (:errors ctx)
-                         :representation {:media-type "application/json"}})
-        
+  (let [errors-in-ctx (errors-in-ctx {:representation {:media-type "application/json"}})
         base {:available-media-types ["application/json"]
               :allowed-methods [:get]
               :authorized? true
