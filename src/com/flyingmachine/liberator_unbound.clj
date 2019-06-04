@@ -49,8 +49,8 @@
      :else (config->resource (combine-configs resource-config)))))
 
 (defn merge-decisions
-  "This allows you to define your resource configurations more
-  compacatly by merging them with a map of decision defaults"
+  "This allows you to define your resource configurations more compactly
+  by merging them with a map of decision defaults"
   [defaults decisions]
   (merge-with merge
               (select-keys defaults (keys decisions))
@@ -63,11 +63,11 @@
    :entry [:show :update :delete]})
 
 (defn resources
-  "e.g. (resources {} {:collection [:list :create]})"
-  [groups config]
-  (into {} (map (fn [[group-name config-keys]]
-                  [group-name (resource-for-keys config config-keys)])
-                groups)))
+  "(resources {:collection [:list :create]} {})"
+  [decision-groups decisions]
+  (into {} (map (fn [[group-name decision-keys]]
+                  [group-name (resource-for-keys decisions decision-keys)])
+                decision-groups)))
 
 (defn resource-route
   "Creates routes, assumes that your resources are grouped
@@ -81,10 +81,13 @@
   "Create one function which will combine the work of resource-route,
   resources, and merge-decisions"
   [groups default-decisions]
-  (fn [path resource-decisions opts & route-opts]
-    (apply resource-route
-           path
-           (->> (resource-decisions opts)
-                (merge-decisions default-decisions)
-                (resources groups))
-           route-opts)))
+  (fn [path resource-decisions & [resource-opts & route-opts]]
+    (let [resource-decisions (if (map? resource-decisions)
+                               (constantly resource-decisions)
+                               resource-decisions)]
+      (apply resource-route
+             path
+             (->> (resource-decisions resource-opts)
+                  (merge-decisions default-decisions)
+                  (resources groups))
+             route-opts))))
